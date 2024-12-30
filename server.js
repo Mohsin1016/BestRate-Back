@@ -13,7 +13,7 @@ connectDB();
 const app = express();
 
 app.use(cors({
-  origin: ['http://localhost:3000', 'https://best-rate-fron.vercel.app'], 
+  origin: ['https://best-rate-fron.vercel.app', 'https://best-rate-fron.vercel.app'], 
   methods: ['GET', 'POST', 'PUT', 'DELETE'], 
   credentials: true, 
 }));
