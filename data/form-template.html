@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            width: 100%;
+            max-width: 600px;
+            margin: 20px auto;
+            background: #ffffff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            background-color: #007bff;
+            color: #ffffff;
+            padding: 20px;
+            text-align: center;
+            font-size: 24px;
+        }
+        .section {
+            padding: 15px 20px;
+            border-bottom: 1px solid #ddd;
+        }
+        .section:last-child {
+            border-bottom: none;
+        }
+        .section h3 {
+            margin: 0 0 10px;
+            font-size: 18px;
+            color: #333333;
+        }
+        .section p {
+            margin: 0;
+            font-size: 14px;
+            color: #555555;
+        }
+        .footer {
+            padding: 15px;
+            text-align: center;
+            font-size: 12px;
+            color: #888888;
+        }
+        .files {
+            margin-top: 10px;
+            font-size: 14px;
+        }
+        .files a {
+            color: #007bff;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            Form Submission Details
+        </div>
+
+        <div class="section">
+            <h3>User ID</h3>
+            <p>{{userId}}</p>
+        </div>
+
+        <div class="section">
+            <h3>Business Information</h3>
+            <p><strong>DBA Name:</strong> {{businessDBA}}</p>
+            <p><strong>Legal Name:</strong> {{legalName}}</p>
+            <p><strong>Tax ID:</strong> {{taxID}}</p>
+            <p><strong>Entity Type:</strong> {{entityType}}</p>
+            <p><strong>Address:</strong> {{businessAddress}}, {{city}}, {{state}}, {{zipcode}}</p>
+            <p><strong>Phone:</strong> {{phone}}</p>
+            <p><strong>Email:</strong> {{email}}</p>
+        </div>
+
+        <div class="section">
+            <h3>Sales Information</h3>
+            <p><strong>Operation Length:</strong> {{operationLength}}</p>
+            <p><strong>Monthly Volume:</strong> {{monthlyVolume}}</p>
+            <p><strong>Average Ticket:</strong> {{averageTicket}}</p>
+            <p><strong>High Ticket:</strong> {{highTicket}}</p>
+        </div>
+
+        <div class="section">
+            <h3>Risk Information</h3>
+            <p><strong>BBB:</strong> {{bbb}}</p>
+            <p><strong>International:</strong> {{international}}</p>
+            <p><strong>Chargebacks:</strong> {{chargebacks}}</p>
+            <p><strong>Legal Suits:</strong> {{legalSuits}}</p>
+            <p><strong>Visa Fine:</strong> {{visaFine}}</p>
+        </div>
+
+        <div class="section">
+            <h3>Owner Information</h3>
+            <p><strong>Name:</strong> {{firstName}} {{lastName}}</p>
+            <p><strong>Cell Phone:</strong> {{cellPhone}}</p>
+            <p><strong>Home Address:</strong> {{homeAddress}}, {{ownerCity}}, {{ownerState}}, {{ownerZipcode}}</p>
+            <p><strong>SSN:</strong> {{ssn}}</p>
+            <p><strong>Date of Birth:</strong> {{dob}}</p>
+        </div>
+
+        <div class="section">
+            <h3>Attached Files</h3>
+            <div class="files">
+                {{#files}}
+                <p><a href="{{.}}" target="_blank">{{.}}</a></p>
+                {{/files}}
+            </div>
+        </div>
+
+        <div class="footer">
+            This email was generated automatically. Please do not reply.
+        </div>
+    </div>
+</body>
+</html>
