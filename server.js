@@ -11,7 +11,8 @@ dotenv.config();
 connectDB();
 
 const app = express();
-
+// http://localhost:5000/
+// https://best-rate-fron.vercel.app
 app.use(cors({
   origin: ['https://best-rate-fron.vercel.app', 'https://best-rate-fron.vercel.app'], 
   methods: ['GET', 'POST', 'PUT', 'DELETE'], 
