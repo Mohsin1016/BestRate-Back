@@ -11,12 +11,16 @@ cloudinary.config({
 });
 
 const calculateScore = (data) => {
-    let score = 650;
+    let score = 650; // Initial score
+    console.log('Initial Score:', score);
 
+    // Entity Type
     if (data.businessInfo.entityType === 'LLC') score += 15;
     else if (data.businessInfo.entityType === 'Corp') score += 10;
     else if (data.businessInfo.entityType === 'Sole Prop') score -= 10;
+    console.log('After Entity Type:', score);
 
+    // Operation Length
     const operationLength = parseInt(data.salesInfo.operationLength);
     if (operationLength === 1) score -= 30;
     else if (operationLength === 2) score -= 10;
@@ -26,7 +30,9 @@ const calculateScore = (data) => {
     else if (operationLength >= 6 && operationLength <= 10) score += 40;
     else if (operationLength >= 11 && operationLength <= 20) score += 45;
     else if (operationLength > 20) score += 50;
+    console.log('After Operation Length:', score);
 
+    // Monthly Volume
     const monthlyVolume = data.salesInfo.monthlyVolume;
     if (monthlyVolume === '0-2500') score -= 20;
     else if (monthlyVolume === '2500-5K') score += 0;
@@ -35,7 +41,9 @@ const calculateScore = (data) => {
     else if (monthlyVolume === '20K-50K') score += 25;
     else if (monthlyVolume === '50K-100K') score += 30;
     else if (monthlyVolume === '100K+') score += 40;
+    console.log('After Monthly Volume:', score);
 
+    // Average Ticket
     const averageTicket = parseInt(data.salesInfo.averageTicket);
     if (averageTicket >= 1 && averageTicket <= 5) score += 19;
     else if (averageTicket >= 6 && averageTicket <= 10) score += 18;
@@ -47,7 +55,9 @@ const calculateScore = (data) => {
     else if (averageTicket >= 1001 && averageTicket <= 5000) score += 12;
     else if (averageTicket >= 5001 && averageTicket <= 10000) score += 11;
     else if (averageTicket > 10000) score += 10;
+    console.log('After Average Ticket:', score);
 
+    // High Ticket
     const highTicket = parseInt(data.salesInfo.highTicket);
     if (highTicket >= 51 && highTicket <= 100) score += 1;
     else if (highTicket >= 101 && highTicket <= 500) score += 2;
@@ -55,11 +65,16 @@ const calculateScore = (data) => {
     else if (highTicket >= 1001 && highTicket <= 5000) score += 4;
     else if (highTicket >= 5001 && highTicket <= 10000) score += 5;
     else if (highTicket > 10000) score += 6;
+    console.log('After High Ticket:', score);
 
+    // Risk Factors
     score += data.riskInfo.bbb === 'Yes' ? -50 : 10;
+    console.log('After BBB Complaints:', score);
 
     score += data.riskInfo.legalSuits === 'Yes' ? -50 : 10;
+    console.log('After Legal Suits:', score);
 
+    // Chargebacks
     const chargebacks = parseInt(data.riskInfo.chargebacks);
     if (chargebacks === 0) score += 50;
     else if (chargebacks >= 1 && chargebacks <= 5) score += 10;
@@ -67,9 +82,11 @@ const calculateScore = (data) => {
     else if (chargebacks >= 11 && chargebacks <= 20) score -= 40;
     else if (chargebacks >= 21 && chargebacks <= 50) score -= 80;
     else if (chargebacks > 50) score -= 150;
+    console.log('After Chargebacks:', score);
 
     return score;
 };
+
 
 const submitForm = async (req, res) => {
     try {
@@ -87,7 +104,7 @@ const submitForm = async (req, res) => {
             });
             uploadedFiles.push(result.secure_url);
         }
-        console.log("Uploaded Files:  🥅🥅🥅🥅", uploadedFiles);
+        console.log("body:  🥅🥅🥅🥅", body);
 
         const formData = new FormData({
             userId: userId,
@@ -182,7 +199,7 @@ const submitForm = async (req, res) => {
 
         const mailOptions = {
             from: "muhammadmohsin1016@gmail.com",
-            to: "goodgammer321@gmail.com",
+            to: "everefficientio@gmail.com",
             subject: 'Form Submission Details',
             html: htmlContent,
         };

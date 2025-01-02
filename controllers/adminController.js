@@ -1,5 +1,5 @@
 const User = require('../models/User');
-
+const bcrypt = require('bcrypt');
 const getUsers = async (req, res) => {
     try {
         const users = await User.find();
@@ -10,9 +10,10 @@ const getUsers = async (req, res) => {
 };
 
 const upsertUser = async (req, res) => {
-    const { id, email, password } = req.body;
+    const { id } = req.params;
+    const { email, password } = req.body;
 
-    console.log("\u2705 Received user request", { id, email, password });
+    console.log("\u2705 Received user request  🍬🍬🍬", { id, email, password });
 
     if (!email || !password) {
         console.log("\u26A0\uFE0F Validation failed: Missing email or password");
@@ -58,31 +59,47 @@ const deleteUser = async (req, res) => {
         res.status(500).json({ message: 'Server error' });
     }
 };
+
 const updateUser = async (req, res) => {
     const { id } = req.params;
     const { email, password } = req.body;
-  
+
+    console.log('🔍 Received request to update user:', { id, email, password });
+
     if (!email || !password) {
-      return res.status(400).json({ message: 'Email and password are required' });
+        console.warn('⚠️ Missing required fields: email or password');
+        return res.status(400).json({ message: 'Email and password are required' });
     }
-  
+
     try {
-      const user = await User.findByIdAndUpdate(
-        id,
-        { email, password },
-        { new: true, runValidators: true }
-      );
-  
-      if (!user) {
-        return res.status(404).json({ message: 'User not found' });
-      }
-  
-      res.status(200).json({ message: 'User updated successfully', user });
+        // Hash the password
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(password, salt);
+
+        console.log("🔑 Hashed password:", hashedPassword);
+
+        console.log('🛠️ Attempting to update user in database with ID:', id);
+
+        // Update the user
+        const user = await User.findByIdAndUpdate(
+            id,
+            { email, password: hashedPassword }, // Corrected key here
+            { new: true, runValidators: true }
+        );
+
+        if (!user) {
+            console.warn('❌ User not found with ID:', id);
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        console.log('✅ User updated successfully:', user);
+        res.status(200).json({ message: 'User updated successfully', user });
     } catch (error) {
-      console.error('Error updating user:', error.message);
-      res.status(500).json({ message: 'Failed to update user' });
+        console.error('💥 Error updating user:', error.message);
+        res.status(500).json({ message: 'Failed to update user' });
     }
-  };
+};
+
   
 
 module.exports = { getUsers, upsertUser, deleteUser,updateUser };
