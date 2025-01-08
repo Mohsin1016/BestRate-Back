@@ -11,12 +11,12 @@ const loginUser = async (req, res) => {
     try {
         const user = await User.findOne({ email });
         if (!user) {
-            return res.status(401).json({ message: 'Please check the email and/or password' });
+            return res.status(401).json({ message: 'Please check the Email' });
         }
 
         const isMatch = await user.matchPassword(password);
         if (!isMatch) {
-            return res.status(401).json({ message: 'Please check the email and/or password' });
+            return res.status(401).json({ message: 'Please check the password' });
         }
 
         const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
