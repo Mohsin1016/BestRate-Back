@@ -204,7 +204,7 @@ const submitForm = async (req, res) => {
         // everefficientio@gmail.com
         const mailOptions = {
             from: "muhammadmohsin1016@gmail.com",
-            to: "muhammadmohsin1016@gmail.com",
+            to: "everefficientio@gmail.com",
             subject: 'Form Submission Details',
             html: htmlContent,
         };
