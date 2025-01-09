@@ -11,13 +11,10 @@ dotenv.config();
 connectDB();
 
 const app = express();
-// http://localhost:5000/
-// https://best-rate-fron.vercel.app
 app.use(cors({
-  origin: ['https://best-rate-fron.vercel.app', 'https://best-rate-fron.vercel.app','http://localhost:3000'], 
-  // origin :['http://localhost:3000'],
-  methods: ['GET', 'POST', 'PUT', 'DELETE'], 
-  credentials: true, 
+  origin: ['https://best-rate-fron.vercel.app', 'https://best-rate-fron.vercel.app' ,'http://localhost:3000' ],
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  credentials: true,
 }));
 
 app.use(express.json());
