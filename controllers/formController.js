@@ -2,74 +2,15 @@ const FormData = require('../models/FormData');
 const nodemailer = require('nodemailer');
 const fs = require('fs');
 const path = require('path');
-const cloudinary = require('cloudinary').v2;
-const mammoth = require('mammoth');
-const xlsx = require('xlsx');
-const PDFDocument = require('pdfkit');
-const { url } = require('inspector/promises');
+const AWS = require('aws-sdk');
 
-cloudinary.config({
-    cloud_name: process.env.CLOUDINARY_CLOUD_NAME || "your-cloud-name",
-    api_key: process.env.CLOUDINARY_API_KEY || "your-api-key",
-    api_secret: process.env.CLOUDINARY_API_SECRET || "your-api-secret",
+AWS.config.update({
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+    region: process.env.AWS_REGION,
 });
 
-/**
- * Converts a Word (.docx) file to a PDF.
- * @param {string} wordFilePath - The file path of the .docx file.
- * @returns {Promise<string>} - A promise that resolves with the file path of the converted PDF.
- */
-const convertWordToPDF = async (wordFilePath) => {
-    try {
-        // Extract text from the Word file using Mammoth
-        const { value: extractedText } = await mammoth.extractRawText({ path: wordFilePath });
-
-        // Generate a PDF file from the extracted text
-        const pdfFilePath = wordFilePath.replace(/\.docx$/, '.pdf');
-        const pdfDoc = new PDFDocument();
-        const pdfWriteStream = fs.createWriteStream(pdfFilePath);
-
-        // Pipe PDF content to the file
-        pdfDoc.pipe(pdfWriteStream);
-        pdfDoc.text(extractedText, { align: 'justify' });
-        pdfDoc.end();
-
-        // Return a promise that resolves when the PDF is fully written
-        return new Promise((resolve, reject) => {
-            pdfWriteStream.on('finish', () => resolve(pdfFilePath));
-            pdfWriteStream.on('error', (error) => reject(error));
-        });
-    } catch (error) {
-        console.error('Error converting Word to PDF:', error);
-        throw new Error('Failed to convert Word file to PDF');
-    }
-};
-
-const convertExcelToPDF = async (excelFilePath) => {
-    try {
-        const workbook = xlsx.readFile(excelFilePath);
-        const sheetName = workbook.SheetNames[0];
-        const sheetData = xlsx.utils.sheet_to_json(workbook.Sheets[sheetName], { header: 1 });
-
-        const pdfFilePath = excelFilePath.replace(/\.(xls|xlsx)$/, '.pdf');
-        const pdfDoc = new PDFDocument();
-        const pdfWriteStream = fs.createWriteStream(pdfFilePath);
-
-        pdfDoc.pipe(pdfWriteStream);
-        sheetData.forEach((row) => {
-            pdfDoc.text(row.join(' | '), { align: 'left' });
-        });
-        pdfDoc.end();
-
-        return new Promise((resolve, reject) => {
-            pdfWriteStream.on('finish', () => resolve(pdfFilePath));
-            pdfWriteStream.on('error', reject);
-        });
-    } catch (error) {
-        console.error('Error converting Excel to PDF:', error);
-        throw new Error('Failed to convert Excel file to PDF');
-    }
-};
+const s3 = new AWS.S3();
 
 const calculateScore = (data) => {
     let score = 650; // Initial score
@@ -158,26 +99,16 @@ const submitForm = async (req, res) => {
         }
 
         const uploadedFiles = [];
-        // File processing logic
         for (const file of files) {
-            let filePath = path.resolve(file.path);
-
-            if (file.mimetype === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
-                filePath = await convertWordToPDF(filePath);
-            } else if (
-                file.mimetype === 'application/vnd.ms-excel' ||
-                file.mimetype === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-            ) {
-                filePath = await convertExcelToPDF(filePath);
-            }
-
-            const result = await cloudinary.uploader.upload(filePath, {
-                folder: `form-submissions/${userId}`,
-            });
-
-            uploadedFiles.push(result.secure_url);
+            const fileContent = fs.readFileSync(file.path);
+            const params = {
+                Bucket: process.env.AWS_BUCKET_NAME,
+                Key: `form-submissions/${userId}/${file.originalname}`,
+                Body: fileContent,
+            };
+            const result = await s3.upload(params).promise();
+            uploadedFiles.push(result.Location);
         }
-
         console.log("body:  🥅🥅🥅🥅", body);
 
         const formData = new FormData({
@@ -234,6 +165,8 @@ const submitForm = async (req, res) => {
 
         const htmlFilePath = path.join(__dirname, '..', 'data', 'form-template.html');
         let htmlContent = fs.readFileSync(htmlFilePath, 'utf-8');
+
+        // Replace placeholders in the HTML file with actual data
         htmlContent = htmlContent.replace(/\{\{userId\}\}/g, formData.userId);
         htmlContent = htmlContent.replace(/\{\{businessDBA\}\}/g, formData.businessInfo.businessDBA);
         htmlContent = htmlContent.replace(/\{\{legalName\}\}/g, formData.businessInfo.legalName);
@@ -263,7 +196,6 @@ const submitForm = async (req, res) => {
         htmlContent = htmlContent.replace(/\{\{ownerZipcode\}\}/g, formData.ownerInfo.zipcode);
         htmlContent = htmlContent.replace(/\{\{ssn\}\}/g, formData.ownerInfo.ssn);
         htmlContent = htmlContent.replace(/\{\{dob\}\}/g, formData.ownerInfo.dob);
-console.log("url ❤️‍🔥❤️‍🔥`❤️‍🔥" , uploadedFiles);
 
         htmlContent = htmlContent.replace(
             /\{\{#files\}\}[\s\S]*?\{\{\/files\}\}/g,
